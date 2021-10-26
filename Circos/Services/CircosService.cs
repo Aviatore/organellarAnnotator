@@ -1,6 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
+using circos.Enums;
 using circos.Models;
 
 namespace circos.Services
@@ -26,7 +29,7 @@ namespace circos.Services
             }
         }
 
-        public async Task BlastReadAsync()
+        public async Task BlastOutputReadAsync()
         {
             foreach (var filePath in _blastOutputFilePaths)
             {
@@ -39,6 +42,24 @@ namespace circos.Services
                     _blastOutputs.Add(blastOutput);
                     
                     line = (await file.ReadLineAsync())?.Trim().Split('\t');
+                }
+            }
+        }
+
+        public async Task GetHighlights()
+        {
+            foreach (var geneType in Enum.GetValues(typeof(GeneType)).Cast<GeneType>())
+            {
+                foreach (var strand in Enum.GetValues(typeof(Strand)).Cast<Strand>())
+                {
+                    var fileName = $"{strand.ToString().ToLower()}_{geneType.ToString().ToLower()}_highlights";
+                    using var sw = new StreamWriter(Path.Combine(Directory.GetCurrentDirectory(), "Data", fileName));
+                    var filteredBlastOutput = _blastOutputs.Where(p => p.Strand == strand && p.GeneType == geneType);
+                    foreach (var blastOutput in filteredBlastOutput)
+                    {
+                        await sw.WriteLineAsync(
+                            $"{blastOutput.CircosId}\t{blastOutput.QueryStart}\t{blastOutput.QueryStop}");
+                    }
                 }
             }
         }

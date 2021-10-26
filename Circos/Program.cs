@@ -11,12 +11,15 @@ namespace circos
         {
             Console.WriteLine("Hello World!");
             var cs = new CircosService(Path.Combine(Directory.GetCurrentDirectory(), "Data/blast_out.txt"));
-            cs.BlastReadAsync().Wait();
+            
+            cs.BlastOutputReadAsync().Wait();
 
             foreach (var blastOutput in cs.GetBlastOutputs())
             {
                 Console.Out.WriteLine($"{blastOutput.QueryId} ::: {blastOutput.SubjectId} ::: {blastOutput.Strand.GetString()}");
             }
+            
+            cs.GetHighlights().Wait();
         }
     }
 }
