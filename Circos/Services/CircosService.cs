@@ -52,13 +52,19 @@ namespace circos.Services
             {
                 foreach (var strand in Enum.GetValues(typeof(Strand)).Cast<Strand>())
                 {
-                    var fileName = $"{strand.ToString().ToLower()}_{geneType.ToString().ToLower()}_highlights";
-                    using var sw = new StreamWriter(Path.Combine(Directory.GetCurrentDirectory(), "Data", fileName));
+                    var fileNameHighlights = $"{strand.ToString().ToLower()}_{geneType.ToString().ToLower()}_highlights";
+                    var fileNameGeneNames = $"{strand.ToString().ToLower()}_{geneType.ToString().ToLower()}_names";
+                    
+                    await using var swHighlights = new StreamWriter(Path.Combine(Directory.GetCurrentDirectory(), "Data", fileNameHighlights));
+                    await using var swNames = new StreamWriter(Path.Combine(Directory.GetCurrentDirectory(), "Data", fileNameGeneNames));
+                    
                     var filteredBlastOutput = _blastOutputs.Where(p => p.Strand == strand && p.GeneType == geneType);
                     foreach (var blastOutput in filteredBlastOutput)
                     {
-                        await sw.WriteLineAsync(
+                        await swHighlights.WriteLineAsync(
                             $"{blastOutput.CircosId}\t{blastOutput.QueryStart}\t{blastOutput.QueryStop}");
+                        await swNames.WriteLineAsync(
+                            $"{blastOutput.CircosId}\t{blastOutput.QueryStart}\t{blastOutput.QueryStop}\t{blastOutput.SubjectId}");
                     }
                 }
             }
