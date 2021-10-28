@@ -54,9 +54,11 @@ namespace circos.Services
                 {
                     var fileNameHighlights = $"{strand.ToString().ToLower()}_{geneType.ToString().ToLower()}_highlights";
                     var fileNameGeneNames = $"{strand.ToString().ToLower()}_{geneType.ToString().ToLower()}_names";
+                    var fileConnectors = $"{strand.ToString().ToLower()}_{geneType.ToString().ToLower()}_connectors";
                     
                     await using var swHighlights = new StreamWriter(Path.Combine(Directory.GetCurrentDirectory(), "Data", fileNameHighlights));
                     await using var swNames = new StreamWriter(Path.Combine(Directory.GetCurrentDirectory(), "Data", fileNameGeneNames));
+                    await using var swConnectors = new StreamWriter(Path.Combine(Directory.GetCurrentDirectory(), "Data", fileConnectors));
                     
                     var filteredBlastOutput = _blastOutputs.Where(p => p.Strand == strand && p.GeneType == geneType);
                     foreach (var blastOutput in filteredBlastOutput)
@@ -68,6 +70,11 @@ namespace circos.Services
                     }
                 }
             }
+        }
+
+        public void GetConnectors(StreamWriter sw, BlastOutput blastOutput)
+        {
+            
         }
 
         public List<BlastOutput> GetBlastOutputs() => _blastOutputs;
