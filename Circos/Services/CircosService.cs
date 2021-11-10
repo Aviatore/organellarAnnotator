@@ -13,6 +13,7 @@ namespace circos.Services
         private List<BlastOutput> _blastOutputs;
         private string[] _blastOutputFilePaths;
         private ChromCounter _chromCounter;
+        private int _minDiff = 3000;
 
         public CircosService(params string[] blastOutputFilePaths)
         {
@@ -60,7 +61,10 @@ namespace circos.Services
                     await using var swNames = new StreamWriter(Path.Combine(Directory.GetCurrentDirectory(), "Data", fileNameGeneNames));
                     await using var swConnectors = new StreamWriter(Path.Combine(Directory.GetCurrentDirectory(), "Data", fileConnectors));
                     
-                    var filteredBlastOutput = _blastOutputs.Where(p => p.Strand == strand && p.GeneType == geneType);
+                    
+                    
+                    var filteredBlastOutput = _blastOutputs.Where(p => p.Strand == strand && p.GeneType == geneType).ToList();
+                    
                     foreach (var blastOutput in filteredBlastOutput)
                     {
                         await swHighlights.WriteLineAsync(
@@ -72,9 +76,33 @@ namespace circos.Services
             }
         }
 
-        public void GetConnectors(StreamWriter sw, BlastOutput blastOutput)
+        public void GetConnectors(StreamWriter sw, List<BlastOutput> filteredBlastOutput)
         {
-            
+            List<BlastOutput> newBlastOutputs = new List<BlastOutput>();
+
+            for (var i = 0; i < filteredBlastOutput.Count; i++)
+            {
+                var blastOutput = filteredBlastOutput[i];
+                if (i == 0)
+                {
+                    newBlastOutputs.Add(blastOutput);
+                    continue;
+                }
+                
+                var diff = filteredBlastOutput[i].Middle - newBlastOutputs.Last().Middle;
+
+                if (diff < _minDiff)
+                {
+                    var newMiddle = filteredBlastOutput[i].Middle + (_minDiff - diff);
+                    var halfDiff = (filteredBlastOutput[i].QueryStop - filteredBlastOutput[i].QueryStart) / 2;
+                    /*filteredBlastOutput[i].QueryStart = newMiddle - halfDiff;
+                    filteredBlastOutput[i].QueryStop = newMiddle + halfDiff;*/
+                    var newQueryStart = newMiddle - halfDiff;
+                    var newQueryStop = newMiddle + halfDiff;
+
+                    newBlastOutputs.Add(filteredBlastOutput[i]);
+                }
+            }
         }
 
         public List<BlastOutput> GetBlastOutputs() => _blastOutputs;

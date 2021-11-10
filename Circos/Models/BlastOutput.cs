@@ -9,8 +9,8 @@ namespace circos.Models
     {
         public string QueryId { get; }
         public string CircosId { get; }
-        public int QueryStart { get; }
-        public int QueryStop { get; }
+        public int QueryStart { get; set; }
+        public int QueryStop { get; set; }
         public string SubjectId { get; }
         public int SubjectStart { get; }
         public int SubjectStop { get; }
@@ -18,6 +18,7 @@ namespace circos.Models
         public int AlignmentLength { get; }
         public Strand Strand { get; }
         public GeneType GeneType { get; }
+        public int Middle { get; set; }
 
         public BlastOutput(string[] input, ChromCounter circosIds)
         {
@@ -68,6 +69,8 @@ namespace circos.Models
             {
                 GeneType = GeneType.Protein;
             }
+            
+            Middle = ((QueryStop - QueryStart) / 2) + QueryStart;
         }
     }
 }
